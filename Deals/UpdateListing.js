@@ -220,65 +220,65 @@ function formatPercentage(input, blur) {
         }, 5000); // 5000 milliseconds = 5 seconds
     });
 
-    // Add this for multi-selection without using ctrl key for select2
-    $('option').mousedown(function(e) {
-        e.preventDefault();
-        var originalScrollTop = $(this).parent().scrollTop();
-        console.log(originalScrollTop);
-        $(this).prop('selected', $(this).prop('selected') ? false : true);
-        var self = this;
-        $(this).parent().focus();
-        setTimeout(function() {
-            $(self).parent().scrollTop(originalScrollTop);
-        }, 0);
-        return false;
+// Add this for multi-selection without using ctrl key for select2
+$('option').mousedown(function(e) {
+    e.preventDefault();
+    var originalScrollTop = $(this).parent().scrollTop();
+    console.log(originalScrollTop);
+    $(this).prop('selected', $(this).prop('selected') ? false : true);
+    var self = this;
+    $(this).parent().focus();
+    setTimeout(function() {
+        $(self).parent().scrollTop(originalScrollTop);
+    }, 0);
+    return false;
+});
+
+// Update list for Select2
+var data = [
+    "1% Rule", 
+    "50% Rule", 
+    "70% Rule", 
+    "Airbnb", 
+    "BRRRR", 
+    "Cash Flow", 
+    "Development", 
+    "Fix-n-Flip", 
+    "High Equity", 
+    "Land", 
+    "Low Entry", 
+    "Low Interest", 
+    "Rental", 
+    "Seller Finance", 
+    "STR", 
+    "Subject-To", 
+    "Wrap"
+];
+var placeholder = "Select Category";
+$(".mySelect").select2({
+    data: data,
+    placeholder: placeholder,
+    allowClear: false,
+    minimumResultsForSearch: 5
+});
+
+// New code starts here
+$(document).ready(function () {
+    // Listen for changes on the multi-select dropdown
+    $('#Listing-Labels').on('change', function () {
+        // Gather selected option values into an array
+        var selectedValues = $(this).val() || [];
+
+        // Join the values with a comma and set it to the 'Tags' input field
+        $('#Tags').val(selectedValues.join(', '));
     });
 
-    // Update list for Select2
-    var data = [
-        "1% Rule", 
-        "50% Rule", 
-        "70% Rule", 
-        "Airbnb", 
-        "BRRRR", 
-        "Cash Flow", 
-        "Development", 
-        "Fix-n-Flip", 
-        "High Equity", 
-        "Land", 
-        "Low Entry", 
-        "Low Interest", 
-        "Rental", 
-        "Seller Finance", 
-        "STR", 
-        "Subject-To", 
-        "Wrap"
-    ];
-    var placeholder = "Select Category";
-    $(".mySelect").select2({
-        data: data,
-        placeholder: placeholder,
-        allowClear: false,
-        minimumResultsForSearch: 5
+    // Before form submission, deselect all options from the multi-select
+    // to ensure they are not included in the form submission
+    $('form').on('submit', function () {
+        $('#Listing-Labels option').prop('selected', false);
     });
-
-    // New code starts here
-    $(document).ready(function () {
-        // Listen for changes on the multi-select dropdown
-        $('#Listing-Labels').on('change', function () {
-            // Gather selected option values into an array
-            var selectedValues = $(this).val() || [];
-        
-            // Join the values with a comma and set it to the 'Tags' input field
-            $('#Tags').val(selectedValues.join(', '));
-        });
-
-        // Before form submission, deselect all options from the multi-select
-        // to ensure they are not included in the form submission
-        $('form').on('submit', function () {
-            $('#Listing-Labels option').prop('selected', false);
-        });
-    });
+});
 
 let checkCount = 0;  // To keep track of how many times we've checked
 
