@@ -213,7 +213,7 @@ function formatPercentage(input, blur) {
 }
 
     // Select the form using its ID
-    document.getElementById('myForm').addEventListener('submit', function (event) {
+    document.getElementById('updateListing').addEventListener('submit', function (event) {
         // The default form submission will continue
         setTimeout(function () {
             window.location.href = "https://www.usefrontdoor.com/deals/my-deals";
@@ -279,3 +279,81 @@ function formatPercentage(input, blur) {
             $('#Listing-Labels option').prop('selected', false);
         });
     });
+
+let checkCount = 0;  // To keep track of how many times we've checked
+
+const interval = setInterval(() => {
+    // Increment the check count
+    checkCount++;
+
+    // Execute your function here
+    checkListing();
+
+    // If we've checked 10 times (which is 30 seconds at 3-second intervals), clear the interval
+    if (checkCount >= 3) {
+        clearInterval(interval);
+    }
+}, 4000);  // 3 seconds interval
+
+function checkListing() {
+    // 1. Grab the `listingID` value from the URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingIDValue = urlParams.get('listingID');
+    console.log('listingIDValue:', listingIDValue);
+
+    // 2. URL encode the listingIDValue and construct the NoCodeAPI URL
+    const encodedListingID = encodeURIComponent(`Slug="${listingIDValue}"`);
+    const apiUrl = `https://v1.nocodeapi.com/frontdoor/airtable/vktIHOcIfjTcpnvI?tableName=$Deals&api_key=oDEXttypMcVRLZFdZ&view=Deals&filterByFormula=${encodedListingID}`;
+    console.log('API URL:', apiUrl);
+
+    // 3. Fetch data from Airtable via NoCodeAPI
+    fetch(apiUrl)
+        .then(response => {
+            console.log('API Response:', response);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Fetched Data:', data);
+            if (data && data.records && data.records.length > 0) {
+                const record = data.records[0].fields;
+                console.log('Selected Record:', record);
+                prefillForm(record);
+            } else {
+                console.log('No records found in the fetched data.');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data from Airtable:', error);
+        });
+}
+
+// 4. Prefill the form fields using the data
+function prefillForm(record) {
+    const mapping = {
+        'Beds': 'Listing-Bed',
+        'Baths': 'Listing-Baths',
+        'Sqft': 'Listing-Sqft',
+        'Lot Size': 'Listing-Lot',
+        'Floors': 'Listing-Floors',
+        'Year': 'Listing-Year',
+        'Garage': 'Listing-Garage',
+        'Assessed': 'Numbers_Assessed',
+        'Taxes': 'Numbers_Taxes',
+        'AirtableID': 'AirtableID'
+    };
+
+    for (let key in mapping) {
+        let htmlElement = document.getElementById(mapping[key]);
+        
+        // Check if the key exists in the record and is not empty 
+        // AND if the corresponding HTML element exists
+        if (record[key] && htmlElement) {
+            console.log(`Setting field ${mapping[key]} with value:`, record[key]);
+            htmlElement.value = record[key];
+        } else if (!record[key]) {
+            console.log(`No value found for field ${key}.`);
+        } else if (!htmlElement) {
+            console.log(`HTML element with ID ${mapping[key]} not found.`);
+        }
+    }
+}
